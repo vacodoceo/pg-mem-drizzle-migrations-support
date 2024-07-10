@@ -119,9 +119,6 @@ export class Adapters implements LibAdapters {
             }
 
             private adaptResults(query: PgQuery, res: QueryResult) {
-                if (query.rowMode) {
-                    throw new NotSupported('pg rowMode');
-                }
                 return {
                     ...res,
                     // clone rows to avoid leaking symbols
@@ -140,6 +137,11 @@ export class Adapters implements LibAdapters {
                                 rowCopy[f.name] = `{${value.join(',')}}`;
                             }
                         }
+
+                        if (query.rowMode === 'array') {
+                            return Object.values(rowCopy);
+                        }
+
                         return rowCopy;
                     }),
                     get fields() {
